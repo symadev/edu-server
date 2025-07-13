@@ -5,7 +5,7 @@ require('dotenv').config()
 const cors = require('cors');
 const { ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+
 
 
 const User = require("./models/User");
@@ -167,19 +167,12 @@ app.delete("/students/:id", async (req, res) => {
 
 
 // Example protected route:
-app.get("/users", verifyToken, async (req, res) => {
-  try {
-    if (req.user.role !== "admin") return res.status(403).send("Only admin can access");
-
-    const role = req.query.role; // example: teacher, parent
-    const filter = role ? { role } : {}; // if role is given, filter by it
-
-    const users = await User.find(filter);
-    res.send({ success: true, data: users }); // wrapped in object with success:true
-  } catch (err) {
-    res.status(500).send({ success: false, message: err.message });
-  }
+app.get("/users", async (req, res) => {
+  const { role } = req.query;
+  const filteredUsers = await User.find({ role });
+  res.send({ success: true, data: filteredUsers });
 });
+
 
 
 // users?role=teacher দিলে শুধু টিচার
