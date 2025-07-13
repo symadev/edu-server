@@ -9,6 +9,7 @@ require('dotenv').config();
 
 
 const User = require("./models/User");
+const Student = require("./models/Student");
 const bcrypt = require("bcryptjs");
 
 
@@ -47,12 +48,144 @@ mongoose.connect(process.env.MONGO_URI)
   }
 };
 
+
+
+///admin-teacher
+
+app.get("/admin/teachers", verifyToken, async (req, res) => {
+  if (req.user.role !== "admin") return res.status(403).send("Forbidden");
+  const teachers = await User.find({ role: "teacher" });
+  res.send(teachers);
+});
+
+
+app.post("/admin/teachers", verifyToken, async (req, res) => {
+  if (req.user.role !== "admin") return res.status(403).send("Forbidden");
+
+  const { name, email, password, subject, phone } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newTeacher = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: "teacher",
+      subject,
+      phone
+    });
+
+    res.status(201).send({ success: true, user: newTeacher });
+  } catch (err) {
+    res.status(400).send({ success: false, message: err.message });
+  }
+});
+
+
+
+
+app.delete("/admin/teachers/:id", verifyToken, async (req, res) => {
+  if (req.user.role !== "admin") return res.status(403).send("Forbidden");
+
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.send({ message: "Teacher deleted successfully" });
+  } catch (err) {
+    res.status(400).send({ message: err.message });
+  }
+});
+
+
+// admin-parents
+
+// Get all parents
+app.get("/admin/parents", verifyToken, async (req, res) => {
+  if (req.user.role !== "admin") return res.status(403).send("Forbidden");
+  const parents = await User.find({ role: "parent" });
+  res.send(parents);
+});
+
+// Add parent
+app.post("/admin/parents", verifyToken, async (req, res) => {
+  if (req.user.role !== "admin") return res.status(403).send("Forbidden");
+
+  const { name, email, phone, password } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await User.create({
+      name,
+      email,
+      phone,
+      password: hashedPassword,
+      role: "parent",
+    });
+
+    res.status(201).send(newUser);
+  } catch (err) {
+    res.status(400).send({ message: err.message });
+  }
+});
+
+// Delete parent
+app.delete("/admin/parents/:id", verifyToken, async (req, res) => {
+  if (req.user.role !== "admin") return res.status(403).send("Forbidden");
+
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.send({ success: true });
+  } catch (err) {
+    res.status(500).send({ message: "Delete failed" });
+  }
+});
+
+
+
+
+// ✅ Get all students
+app.get("/students", async (req, res) => {
+  const students = await Student.find().populate("assignedTeacher assignedParent", "name email");
+  res.send(students);
+});
+
+// ✅ Add new student
+app.post("/students", async (req, res) => {
+  const student = new Student(req.body);
+  await student.save();
+  res.send({ success: true, newStudent: student });
+});
+
+// ✅ Delete student
+app.delete("/students/:id", async (req, res) => {
+  await Student.findByIdAndDelete(req.params.id);
+  res.send({ success: true });
+});
+
+
+
+
+
 // Example protected route:
 app.get("/users", verifyToken, async (req, res) => {
-  if (req.user.role !== "admin") return res.status(403).send("Only admin can access");
-  const users = await User.find();
-  res.send(users);
+  try {
+    if (req.user.role !== "admin") return res.status(403).send("Only admin can access");
+
+    const role = req.query.role; // example: teacher, parent
+    const filter = role ? { role } : {}; // if role is given, filter by it
+
+    const users = await User.find(filter);
+    res.send({ success: true, data: users }); // wrapped in object with success:true
+  } catch (err) {
+    res.status(500).send({ success: false, message: err.message });
+  }
 });
+
+
+// users?role=teacher দিলে শুধু টিচার
+//  /users?role=parent দিলে শুধু প্যারেন্ট
+// /users দিলে সব ইউজার
+
 
 
 
