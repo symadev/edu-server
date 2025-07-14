@@ -5,9 +5,9 @@ const studentSchema = new mongoose.Schema({
   name: String,
   class: String,
   roll: String,
-  section: String,
-  assignedTeacher: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  assignedParent: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+ assignedTeacher: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+assignedParent: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+
   createdAt: { type: Date, default: Date.now }
 });
 
