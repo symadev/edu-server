@@ -1,4 +1,3 @@
-// graphql/typeDefs.js
 const { gql } = require("apollo-server-express");
 
 const typeDefs = gql`
@@ -28,21 +27,42 @@ const typeDefs = gql`
     assignedParent: ID!
   }
 
-  type Query {
-    students: [Student]
-    studentsByUser(userId: ID!, role: String!): [Student]
-     teachers: [User]   
-  parents: [User]
+  type Homework {
+    _id: ID!
+    title: String!
+    description: String!
+    class: String!
+    dueDate: String!
+    createdBy: User
   }
 
-  type Mutation {
-    addStudent(input: AddStudentInput!): Student
-    deleteStudent(id: ID!): Response
+  input AddHomeworkInput {
+    title: String!
+    description: String!
+    class: String!
+    dueDate: String!
+    createdBy: ID!
   }
 
   type Response {
     success: Boolean!
     message: String
+  }
+
+  type Query {
+    students: [Student]
+    studentsByUser(userId: ID!, role: String!): [Student]
+    teachers: [User]
+    parents: [User]
+    homeworks: [Homework]
+  }
+
+  type Mutation {
+    addStudent(input: AddStudentInput!): Student
+    deleteStudent(id: ID!): Response
+
+    addHomework(input: AddHomeworkInput!): Homework
+    deleteHomework(id: ID!): Response
   }
 `;
 

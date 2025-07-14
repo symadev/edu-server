@@ -1,6 +1,7 @@
 // graphql/resolvers.js
 const Student = require("../models/Student");
 const User = require("../models/User");
+const Homework = require("../models/Homework");
 
 const resolvers = {
   Query: {
@@ -28,6 +29,11 @@ const resolvers = {
     parents: async () => {
       return await User.find({ role: "parent" });
     },
+
+
+    homeworks: async () => {
+      return await Homework.find().populate('createdBy');
+    },
   },
 
   Mutation: {
@@ -43,6 +49,20 @@ const resolvers = {
       await Student.findByIdAndDelete(id);
       return { success: true, message: "Deleted successfully" };
     },
+
+
+     addHomework: async (_, { input }) => {
+      const newHW = new Homework(input);
+      await newHW.save();
+      return await newHW.populate('createdBy');
+      
+    },
+
+    deleteHomework: async (_, { id }) => {
+  await Homework.findByIdAndDelete(id);
+  return { success: true, message: "Homework deleted successfully" };
+},
+
   },
 };
 
