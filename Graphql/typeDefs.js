@@ -44,10 +44,31 @@ const typeDefs = gql`
     createdBy: ID!
   }
 
-  type Response {
+ 
+
+  
+  type Attendance {
+  _id: ID!
+  student: Student!       
+  date: String!
+  status: String!
+  markedBy: User!          
+}
+
+input AddAttendanceInput {
+  date: String!
+  student: ID!            
+  status: String!
+  markedBy: ID!
+}
+
+
+
+ type Response {
     success: Boolean!
     message: String
   }
+
 
   type Query {
     students: [Student]
@@ -55,7 +76,12 @@ const typeDefs = gql`
     teachers: [User]
     parents: [User]
     homeworks: [Homework]
+     getAttendanceByStudent(studentId: ID!): [Attendance]
+    getAttendanceByTeacher(teacherId: ID!): [Attendance]
   }
+
+
+
 
   type Mutation {
     addStudent(input: AddStudentInput!): Student
@@ -63,6 +89,9 @@ const typeDefs = gql`
 
     addHomework(input: AddHomeworkInput!): Homework
     deleteHomework(id: ID!): Response
+
+
+     addAttendance(input: AddAttendanceInput!): Response
   }
 `;
 

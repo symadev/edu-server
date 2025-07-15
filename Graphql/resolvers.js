@@ -2,6 +2,7 @@
 const Student = require("../models/Student");
 const User = require("../models/User");
 const Homework = require("../models/Homework");
+const Attendance = require("../models/Attendance");
 
 const resolvers = {
   Query: {
@@ -34,6 +35,20 @@ const resolvers = {
     homeworks: async () => {
       return await Homework.find().populate('createdBy');
     },
+
+
+
+     getAttendanceByStudent: async (_, { studentId }) => {
+      return await Attendance.find({ student: studentId })
+        .populate("student")
+        .populate("markedBy");
+    },
+
+    getAttendanceByTeacher: async (_, { teacherId }) => {
+      return await Attendance.find({ markedBy: teacherId })
+        .populate("student")
+        .populate("markedBy");
+    },
   },
 
   Mutation: {
@@ -51,17 +66,37 @@ const resolvers = {
     },
 
 
-     addHomework: async (_, { input }) => {
+    addHomework: async (_, { input }) => {
       const newHW = new Homework(input);
       await newHW.save();
       return await newHW.populate('createdBy');
-      
+
     },
 
     deleteHomework: async (_, { id }) => {
-  await Homework.findByIdAndDelete(id);
-  return { success: true, message: "Homework deleted successfully" };
-},
+      await Homework.findByIdAndDelete(id);
+      return { success: true, message: "Homework deleted successfully" };
+    },
+
+    
+
+   addAttendance: async (_, { input }) => {
+  try {
+    const newAttendance = new Attendance(input);
+    await newAttendance.save();
+    return {
+      success: true,
+      message: "Attendance marked successfully.",
+    };
+  } catch (error) {
+    console.error("Attendance Error:", error.message);
+    return {
+      success: false,
+      message: "Failed to mark attendance: " + error.message,
+    };
+  }
+}
+
 
   },
 };
