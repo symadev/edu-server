@@ -64,10 +64,44 @@ input AddAttendanceInput {
 
 
 
- type Response {
+ 
+
+  type Result {
+  _id: ID!
+  student: Student!
+  subject: String!
+  marks: Int!
+  grade: String
+  remarks: String
+  addedBy: User!
+  date: String
+}
+
+input AddResultInput {
+  student: ID!
+  subject: String!
+  marks: Int!
+  grade: String
+  remarks: String
+  addedBy: ID!
+}
+
+
+
+type Response {
     success: Boolean!
     message: String
   }
+
+
+extend type Query {
+  getResultsByStudent(studentId: ID!): [Result]
+}
+
+extend type Mutation {
+  addResult(input: AddResultInput!):  Response
+}
+
 
 
   type Query {

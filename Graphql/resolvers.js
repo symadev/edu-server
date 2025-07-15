@@ -3,6 +3,7 @@ const Student = require("../models/Student");
 const User = require("../models/User");
 const Homework = require("../models/Homework");
 const Attendance = require("../models/Attendance");
+const Result = require("../models/Result");
 
 const resolvers = {
   Query: {
@@ -48,6 +49,17 @@ const resolvers = {
       return await Attendance.find({ markedBy: teacherId })
         .populate("student")
         .populate("markedBy");
+    },
+
+
+
+
+
+
+       getResultsByStudent: async (_, { studentId }) => {
+      return await Result.find({ student: studentId })
+        .populate("student")
+        .populate("addedBy");
     },
   },
 
@@ -95,7 +107,29 @@ const resolvers = {
       message: "Failed to mark attendance: " + error.message,
     };
   }
+},
+
+
+
+
+ addResult: async (_, { input }) => {
+  try {
+    const newResult = new Result(input);
+    await newResult.save();
+
+    return {
+      success: true,
+      message: "Result added successfully.",
+    };
+  } catch (error) {
+    console.error("Error adding result:", error.message);
+    return {
+      success: false,
+      message: "Failed to add result: " + error.message,
+    };
+  }
 }
+
 
 
   },
