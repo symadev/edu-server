@@ -61,7 +61,28 @@ const resolvers = {
         .populate("student")
         .populate("addedBy");
     },
+
+
+
+     myChild: async (_, { parentId }) => {
+      return await Student.findOne({ assignedParent: parentId }).populate("assignedTeacher assignedParent");
+    },
+   homeworkByChild: async (_, { childId }) => {
+  const student = await Student.findById(childId);
+  if (!student) return [];
+  return await Homework.find({ class: student.class }).populate("createdBy");
+},
+
+    attendanceByChild: async (_, { childId }) => {
+      return await Attendance.find({ student: childId });
+    },
+    resultByChild: async (_, { childId }) => {
+      return await Result.find({ student: childId });
+    },
   },
+
+
+
 
   Mutation: {
     // Add a new student

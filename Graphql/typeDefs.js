@@ -94,13 +94,6 @@ type Response {
   }
 
 
-extend type Query {
-  getResultsByStudent(studentId: ID!): [Result]
-}
-
-extend type Mutation {
-  addResult(input: AddResultInput!):  Response
-}
 
 
 
@@ -110,8 +103,16 @@ extend type Mutation {
     teachers: [User]
     parents: [User]
     homeworks: [Homework]
-     getAttendanceByStudent(studentId: ID!): [Attendance]
+    getAttendanceByStudent(studentId: ID!): [Attendance]
     getAttendanceByTeacher(teacherId: ID!): [Attendance]
+    getResultsByStudent(studentId: ID!): [Result]
+
+
+
+    myChild(parentId: ID!): Student
+    homeworkByChild(childId: ID!): [Homework]
+    attendanceByChild(childId: ID!): [Attendance]
+    resultByChild(childId: ID!): [Result]
   }
 
 
@@ -126,6 +127,7 @@ extend type Mutation {
 
 
      addAttendance(input: AddAttendanceInput!): Response
+    addResult(input: AddResultInput!):  Response
   }
 `;
 
