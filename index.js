@@ -15,8 +15,8 @@ dotenv.config();
 // Models and GraphQL schema
 const User = require('./models/User');
 const Student = require('./models/Student');
-const typeDefs = require('./graphql/typeDefs');
-const resolvers = require('./graphql/resolvers');
+const typeDefs = require('./Graphql/typeDefs');
+const resolvers = require('./Graphql/resolvers');
 
 // App setup
 const app = express();

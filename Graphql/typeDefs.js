@@ -29,18 +29,18 @@ const typeDefs = gql`
 
   type Homework {
     _id: ID!
-   
+    title: String!
     description: String!
-    subject:String!
+   
     class: String!
     dueDate: String!
     createdBy: User
   }
 
   input AddHomeworkInput {
-    
+    title: String!
     description: String!
-    subject:String!
+  
     class: String!
     dueDate: String!
     createdBy: ID!
