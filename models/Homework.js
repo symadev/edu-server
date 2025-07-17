@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 
 const homeworkSchema = new mongoose.Schema({
-  title: String,
+  
   description: String,
+  subject:String,
   class: String,
   dueDate: String,
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

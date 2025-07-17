@@ -29,16 +29,18 @@ const typeDefs = gql`
 
   type Homework {
     _id: ID!
-    title: String!
+   
     description: String!
+    subject:String!
     class: String!
     dueDate: String!
     createdBy: User
   }
 
   input AddHomeworkInput {
-    title: String!
+    
     description: String!
+    subject:String!
     class: String!
     dueDate: String!
     createdBy: ID!
@@ -88,6 +90,18 @@ input AddResultInput {
 
 
 
+
+type Notification {
+  _id: ID!
+  parentId: ID!
+  message: String!
+  type: String!
+  isRead: Boolean!
+  createdAt: String!
+}
+
+
+
 type Response {
     success: Boolean!
     message: String
@@ -102,10 +116,11 @@ type Response {
     studentsByUser(userId: ID!, role: String!): [Student]
     teachers: [User]
     parents: [User]
-    homeworks: [Homework]
+    homeworksByTeacher(teacherId: ID!): [Homework]
     getAttendanceByStudent(studentId: ID!): [Attendance]
     getAttendanceByTeacher(teacherId: ID!): [Attendance]
     getResultsByStudent(studentId: ID!): [Result]
+     notificationsByParent(parentId: ID!): [Notification]
 
 
 
@@ -128,6 +143,10 @@ type Response {
 
      addAttendance(input: AddAttendanceInput!): Response
     addResult(input: AddResultInput!):  Response
+
+
+     markNotificationRead(id: ID!): Notification
+  createNotification(parentId: ID!, message: String!, type: String!): Notification
   }
 `;
 
