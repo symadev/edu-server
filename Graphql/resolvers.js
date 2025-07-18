@@ -159,6 +159,10 @@ const resolvers = {
       await Homework.findByIdAndDelete(id);
       return { success: true, message: "Homework deleted successfully" };
     },
+     deleteResult: async (_, { resultId }) => {
+    await Result.findByIdAndDelete(resultId);
+    return { success: true, message: "Result deleted" };
+  },
 
 
 

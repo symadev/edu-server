@@ -166,6 +166,7 @@ type Response {
 
     addHomework(input: AddHomeworkInput!): Homework
     deleteHomework(id: ID!): Response
+    deleteResult(resultId: ID!): Response
 
 
      addAttendance(input: AddAttendanceInput!): Response
