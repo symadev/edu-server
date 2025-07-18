@@ -59,6 +59,19 @@ const verifyToken = (req, res, next) => {
 
 
 
+
+
+const verifyAdmin = (req, res, next) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Admins only" });
+  }
+  next();
+};
+
+
+
+
+
 // Start Apollo Server and attach to /graphql
 async function startServer() {
   const server = new ApolloServer({ typeDefs, resolvers });
@@ -73,7 +86,7 @@ async function startServer() {
 
 
   // REST API routes (Admin only)
-  app.get("/admin/teachers", verifyToken, async (req, res) => {
+  app.get("/admin/teachers", verifyToken ,verifyAdmin, async (req, res) => {
     if (req.user.role !== "admin") return res.status(403).send("Forbidden");
     const teachers = await User.find({ role: "teacher" });
     res.send(teachers);
@@ -82,7 +95,7 @@ async function startServer() {
 
 
 
-  app.post("/admin/teachers", verifyToken, async (req, res) => {
+  app.post("/admin/teachers", verifyToken ,verifyAdmin, async (req, res) => {
     if (req.user.role !== "admin") return res.status(403).send("Forbidden");
     const { name, email, password, subject, phone } = req.body;
     try {
@@ -98,7 +111,7 @@ async function startServer() {
 
 
 
-  app.delete("/admin/teachers/:id", verifyToken, async (req, res) => {
+  app.delete("/admin/teachers/:id", verifyToken ,verifyAdmin, async (req, res) => {
     if (req.user.role !== "admin") return res.status(403).send("Forbidden");
     try {
       await User.findByIdAndDelete(req.params.id);
@@ -112,7 +125,7 @@ async function startServer() {
 
 
 
-  app.get("/admin/parents", verifyToken, async (req, res) => {
+  app.get("/admin/parents",verifyToken ,verifyAdmin, async (req, res) => {
     if (req.user.role !== "admin") return res.status(403).send("Forbidden");
     const parents = await User.find({ role: "parent" });
     res.send(parents);
@@ -122,7 +135,7 @@ async function startServer() {
 
 
 
-  app.post("/admin/parents", verifyToken, async (req, res) => {
+  app.post("/admin/parents",verifyToken ,verifyAdmin, async (req, res) => {
     if (req.user.role !== "admin") return res.status(403).send("Forbidden");
     const { name, email, phone, password } = req.body;
     try {
@@ -138,7 +151,7 @@ async function startServer() {
 
 
 
-  app.delete("/admin/parents/:id", verifyToken, async (req, res) => {
+  app.delete("/admin/parents/:id", verifyToken ,verifyAdmin, async (req, res) => {
     if (req.user.role !== "admin") return res.status(403).send("Forbidden");
     try {
       await User.findByIdAndDelete(req.params.id);
@@ -147,6 +160,50 @@ async function startServer() {
       res.status(500).send({ message: "Delete failed" });
     }
   });
+
+
+
+ app.get("/admin/current", verifyToken ,verifyAdmin, async (req, res) => {
+  try {
+    const admin = await User.findById(req.user.id).select("name email");
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+    res.status(200).json(admin);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+
+app.put("/admin/update", verifyToken ,verifyAdmin, async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const updateData = {};
+
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(password, salt);
+    }
+
+    const updatedAdmin = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: updateData },
+      { new: true }
+    ).select("name email");
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      admin: updatedAdmin,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Update failed" });
+  }
+});
 
   app.get("/me", verifyToken, async (req, res) => {
   const user = await User.findById(req.user.id).select("-password");
