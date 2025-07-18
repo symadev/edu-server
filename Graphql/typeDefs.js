@@ -108,6 +108,22 @@ input NotificationInput {
 }
 
 
+input FeedbackInput {
+    type: String!      
+    subject: String!
+    message: String!
+    rating: Int         
+  }
+
+  
+
+
+
+
+
+
+
+
 
 
 
@@ -138,6 +154,7 @@ type Response {
     homeworkByChild(childId: ID!): [Homework]
     attendanceByChild(childId: ID!): [Attendance]
     resultByChild(childId: ID!): [Result]
+  
   }
 
 
@@ -160,6 +177,14 @@ type Response {
     markNotificationsAsRead(parentId: ID!): Response
 
     deleteReadNotifications(parentId: ID!): Response
+
+
+
+     createFeedbackOrComplaint(input: FeedbackInput!): Response
+
+
+
+   
   }
 `;
 

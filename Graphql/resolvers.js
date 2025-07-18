@@ -3,8 +3,9 @@ const Student = require("../models/Student");
 const User = require("../models/User");
 const Homework = require("../models/Homework");
 const Attendance = require("../models/Attendance");
-const Result = require("../models/Result");
 const Notification = require("../models/Notification");
+const Result = require("../models/Result");
+const Feedback = require("../models/Feedback");
 
 const resolvers = {
   Query: {
@@ -36,13 +37,13 @@ const resolvers = {
 
     // homeworks: async () => {
     //   return await Homework.find().populate('createdBy');   ......>>> this is wrong , cause because of this every teacher show the homeworks  not 
-                                                                        // the specific or the assign one 
+    // the specific or the assign one 
     // },
 
 
     homeworksByTeacher: async (_, { teacherId }) => {
-  return await Homework.find({ createdBy: teacherId }).populate("createdBy");
-},
+      return await Homework.find({ createdBy: teacherId }).populate("createdBy");
+    },
 
 
 
@@ -87,8 +88,8 @@ const resolvers = {
     resultByChild: async (_, { childId }) => {
       return await Result.find({ student: childId });
     },
-    
-notificationsByParent: async (_, { parentId }) => {
+
+    notificationsByParent: async (_, { parentId }) => {
       try {
         const notifications = await Notification.find({ parentId }).sort({ createdAt: -1 });
         return notifications;
@@ -96,6 +97,12 @@ notificationsByParent: async (_, { parentId }) => {
         throw new Error('Failed to fetch notifications');
       }
     },
+
+
+
+ 
+
+
 
   },
 
@@ -117,30 +124,30 @@ notificationsByParent: async (_, { parentId }) => {
     },
 
 
-addHomework: async (_, { input }) => {
-  const newHW = new Homework(input);
-  await newHW.save();
-  const populatedHW = await newHW.populate("createdBy");
+    addHomework: async (_, { input }) => {
+      const newHW = new Homework(input);
+      await newHW.save();
+      const populatedHW = await newHW.populate("createdBy");
 
-  // Step 1: Find all students of this class
-  const students = await Student.find({ class: input.class });
+      // Step 1: Find all students of this class
+      const students = await Student.find({ class: input.class });
 
-  // Step 2: Get all unique parent IDs
-  const parentIds = students
-    .map((s) => s.assignedParent)
-    .filter(Boolean); // avoid nulls
+      // Step 2: Get all unique parent IDs
+      const parentIds = students
+        .map((s) => s.assignedParent)
+        .filter(Boolean); // avoid nulls
 
-  // Step 3: Create notifications for each parent
-  for (const parentId of parentIds) {
-    await Notification.create({
-      parentId,
-      message: "New homework has been assigned.",
-      type: "homework",
-    });
-  }
+      // Step 3: Create notifications for each parent
+      for (const parentId of parentIds) {
+        await Notification.create({
+          parentId,
+          message: "New homework has been assigned.",
+          type: "homework",
+        });
+      }
 
-  return populatedHW;
-},
+      return populatedHW;
+    },
 
 
 
@@ -175,60 +182,94 @@ addHomework: async (_, { input }) => {
 
 
 
-  addResult: async (_, { input }) => {
-  try {
-    const newResult = new Result(input);
-    await newResult.save();
+    addResult: async (_, { input }) => {
+      try {
+        const newResult = new Result(input);
+        await newResult.save();
 
-    const student = await Student.findById(input.student);
-    if (student?.assignedParent) {
-      await Notification.create({
-        parentId: student.assignedParent,
-        message: "Report card has been published.",
-        type: "result",
-      });
-    }
+        const student = await Student.findById(input.student);
+        if (student?.assignedParent) {
+          await Notification.create({
+            parentId: student.assignedParent,
+            message: "Report card has been published.",
+            type: "result",
+          });
+        }
 
-    return {
-      success: true,
-      message: "Result added successfully.",
-    };
-  } catch (error) {
-    console.error("Error adding result:", error.message);
-    return {
-      success: false,
-      message: "Failed to add result: " + error.message,
-    };
-  }
-},
+        return {
+          success: true,
+          message: "Result added successfully.",
+        };
+      } catch (error) {
+        console.error("Error adding result:", error.message);
+        return {
+          success: false,
+          message: "Failed to add result: " + error.message,
+        };
+      }
+    },
 
-//notification 
+    //notification 
 
- createNotification: async (_, { input }) => {
+    createNotification: async (_, { input }) => {
       return await Notification.create(input);
     },
 
-    
-markNotificationsAsRead: async (_, { parentId }) => {
-  const result = await Notification.updateMany(
-    { parentId, isRead: false },
-    { $set: { isRead: true } }
-  );
-  return { success: true, message: `${result.modifiedCount} notifications marked as read` };
-},
+
+    markNotificationsAsRead: async (_, { parentId }) => {
+      const result = await Notification.updateMany(
+        { parentId, isRead: false },
+        { $set: { isRead: true } }
+      );
+      return { success: true, message: `${result.modifiedCount} notifications marked as read` };
+    },
 
 
     deleteReadNotifications: async (_, { parentId }) => {
       await Notification.deleteMany({ parentId, isRead: true });
       return "Read notifications deleted successfully";
     },
+
+
+
+
+
+  createFeedbackOrComplaint: async (_, { input }) => {
+      try {
+        const feedback = new Feedback({
+          type: input.type,
+          subject: input.subject,
+          message: input.message,
+          rating: input.rating || null,
+          createdAt: new Date(),
+        });
+
+        await feedback.save();
+
+        return {
+          success: true,
+          message: 'Successfully saved your submission.',
+        };
+      } catch (error) {
+        console.error('Error saving feedback:', error);
+        return {
+          success: false,
+          message: 'Failed to save submission.',
+        };
+      }
+    },
+
+
+
+
+
   },
 
 
 
 
-  
-  
+
+
 };
 
 module.exports = resolvers;

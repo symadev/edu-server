@@ -204,6 +204,10 @@ app.put("/admin/assign-admin", verifyToken, verifyAdmin, async (req, res) => {
 
 
 
+
+
+
+
   app.get("/me", verifyToken, async (req, res) => {
   const user = await User.findById(req.user.id).select("-password");
   res.send(user);
