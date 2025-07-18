@@ -49,6 +49,7 @@ const verifyToken = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
+    
     next();
   } catch {
     res.status(403).send("Forbidden");
@@ -61,8 +62,9 @@ const verifyToken = (req, res, next) => {
 
 
 
+
 const verifyAdmin = (req, res, next) => {
-  if (req.user.role !== "admin") {
+  if (!req.user || req.user.role !== "admin") {
     return res.status(403).json({ message: "Admins only" });
   }
   next();
@@ -176,34 +178,31 @@ async function startServer() {
 });
 
 
-
-app.put("/admin/update", verifyToken ,verifyAdmin, async (req, res) => {
+app.put("/admin/assign-admin", verifyToken, verifyAdmin, async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    const updateData = {};
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email is required" });
 
-    if (name) updateData.name = name;
-    if (email) updateData.email = email;
+    // ইউজার খুঁজে বের করো
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (password) {
-      const salt = await bcrypt.genSalt(10);
-      updateData.password = await bcrypt.hash(password, salt);
-    }
+    // role আপডেট করো
+    user.role = "admin";
+    await user.save();
 
-    const updatedAdmin = await User.findByIdAndUpdate(
-      req.user.id,
-      { $set: updateData },
-      { new: true }
-    ).select("name email");
-
-    res.status(200).json({
-      message: "Profile updated successfully",
-      admin: updatedAdmin,
-    });
+    res.status(200).json({ message: `${email} is now assigned as admin` });
   } catch (error) {
-    res.status(500).json({ message: "Update failed" });
+    console.error(error);
+    res.status(500).json({ message: "Failed to assign admin role" });
   }
 });
+
+
+
+
+
+
 
   app.get("/me", verifyToken, async (req, res) => {
   const user = await User.findById(req.user.id).select("-password");
