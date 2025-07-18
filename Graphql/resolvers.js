@@ -87,10 +87,15 @@ const resolvers = {
     resultByChild: async (_, { childId }) => {
       return await Result.find({ student: childId });
     },
-
-    notificationsByParent: async (_, { parentId }) => {
-  return await Notification.find({ parentId }).sort({ createdAt: -1 });
-}
+    
+notificationsByParent: async (_, { parentId }) => {
+      try {
+        const notifications = await Notification.find({ parentId }).sort({ createdAt: -1 });
+        return notifications;
+      } catch (error) {
+        throw new Error('Failed to fetch notifications');
+      }
+    },
 
   },
 
@@ -197,10 +202,33 @@ addHomework: async (_, { input }) => {
   }
 },
 
+//notification 
+
+ createNotification: async (_, { input }) => {
+      return await Notification.create(input);
+    },
+
+    
+markNotificationsAsRead: async (_, { parentId }) => {
+  const result = await Notification.updateMany(
+    { parentId, isRead: false },
+    { $set: { isRead: true } }
+  );
+  return { success: true, message: `${result.modifiedCount} notifications marked as read` };
+},
 
 
-
+    deleteReadNotifications: async (_, { parentId }) => {
+      await Notification.deleteMany({ parentId, isRead: true });
+      return "Read notifications deleted successfully";
+    },
   },
+
+
+
+
+  
+  
 };
 
 module.exports = resolvers;
