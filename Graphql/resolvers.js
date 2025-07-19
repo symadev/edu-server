@@ -117,12 +117,10 @@ const resolvers = {
       return await newStudent.populate("assignedTeacher assignedParent");
     },
 
-    // Delete a student by ID
-    deleteStudent: async (_, { id }) => {
-      await Student.findByIdAndDelete(id);
-      return { success: true, message: "Deleted successfully" };
-    },
-
+     deleteStudent: async (_, { studentId }) => {
+    await Student.findByIdAndDelete(studentId);
+    return { success: true, message: "Student data deleted" };
+  },
 
     addHomework: async (_, { input }) => {
       const newHW = new Homework(input);

@@ -162,7 +162,7 @@ type Response {
 
   type Mutation {
     addStudent(input: AddStudentInput!): Student
-    deleteStudent(id: ID!): Response
+    deleteStudent(studentId: ID!): Response
 
     addHomework(input: AddHomeworkInput!): Homework
     deleteHomework(id: ID!): Response
