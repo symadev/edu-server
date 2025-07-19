@@ -220,15 +220,44 @@ app.put("/admin/assign-admin", verifyToken, verifyAdmin, async (req, res) => {
 
   // Auth Routes
   app.post("/signup", async (req, res) => {
-    const { name, email, password, role } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    try {
-      const newUser = await User.create({ name, email, password: hashedPassword, role });
-      res.status(201).send({ success: true, user: newUser });
-    } catch (err) {
-      res.status(400).send({ success: false, message: err.message });
+  const { name, email, password, role } = req.body;
+
+  try {
+    // 1. Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).send({ success: false, message: "User already exists" });
     }
-  });
+
+    // 2. Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 3. Create the user
+    const newUser = await User.create({ name, email, password: hashedPassword, role });
+
+    // 4. Generate JWT token
+    const token = jwt.sign(
+      { userId: newUser._id, role: newUser.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // 5. Return success + token + user (excluding password)
+    res.status(201).send({
+      success: true,
+      token,
+      user: {
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+      },
+    });
+  } catch (err) {
+    res.status(400).send({ success: false, message: err.message });
+  }
+});
+
 
 
 
