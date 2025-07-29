@@ -1,6 +1,6 @@
 # 🎓 EduHalo – Smart Homework & Attendance Tracker for Parents & Teachers (Backend)
 
-EduHalo is a modern, intelligent school management system built with **MERN Stack** and **GraphQL**. This backend repository powers the server-side logic, handling all API requests, database operations, and real-time updates.
+EduHalo is a modern, Homework & Attendance Tracker system built with **MERN Stack** and **GraphQL**. This backend repository powers the server-side logic, handling all API requests, database operations, and real-time updates.
 
 > 🔗 **Frontend Repository:** [eduhalo-frontend](https://github.com/symadev/eduhalo)
 
